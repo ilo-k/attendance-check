@@ -59,12 +59,8 @@ export function Home() {
 
   return (
     <div className="page">
-      <h1 className="app-title">🌙Luna Store</h1>
-
       <header className="home-header">
-        <div>
-          <strong>{user?.nickname}</strong>님 환영합니다
-        </div>
+        <h1 className="app-title">🌙Luna Store</h1>
         <div className="home-actions">
           <Link to="/nickname" className="btn">
             닉네임 변경
@@ -74,6 +70,10 @@ export function Home() {
           </button>
         </div>
       </header>
+
+      <p className="welcome-text">
+        <strong>{user?.nickname}</strong>님 환영합니다
+      </p>
 
       <div className="calendar-nav">
         <button onClick={() => changeMonth(-1)}>&lt;</button>
