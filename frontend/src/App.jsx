@@ -3,6 +3,7 @@ import { Login } from "./pages/Login.jsx";
 import { Nickname } from "./pages/Nickname.jsx";
 import { Home } from "./pages/Home.jsx";
 import { CheckIn } from "./pages/CheckIn.jsx";
+import { Dashboard } from "./pages/Dashboard.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 
 export function App() {
@@ -30,6 +31,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <CheckIn />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
           </ProtectedRoute>
         }
       />

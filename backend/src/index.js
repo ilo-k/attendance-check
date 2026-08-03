@@ -4,6 +4,7 @@ import cors from "cors";
 import { authRouter } from "./routes/auth.js";
 import { checkinRouter } from "./routes/checkin.js";
 import { attendanceRouter } from "./routes/attendance.js";
+import { dashboardRouter } from "./routes/dashboard.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/checkin", checkinRouter);
 app.use("/api/attendance", attendanceRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

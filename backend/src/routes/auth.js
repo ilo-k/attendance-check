@@ -57,10 +57,10 @@ authRouter.post("/nickname", requireAuth, async (req, res) => {
     return res.status(409).json({ error: "이미 사용 중인 닉네임입니다." });
   }
 
-  const user = await prisma.user.update({
-    where: { id: req.user.id },
-    data: { nickname },
-  });
+  const [user] = await prisma.$transaction([
+    prisma.user.update({ where: { id: req.user.id }, data: { nickname } }),
+    prisma.attendance.updateMany({ where: { userId: req.user.id }, data: { userName: nickname } }),
+  ]);
 
   return res.json({ user: { id: user.id, nickname: user.nickname, email: user.email } });
 });

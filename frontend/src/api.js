@@ -29,4 +29,6 @@ export const api = {
   checkIn: (token) => request("/api/checkin", { method: "POST", token }),
   getAttendance: (token, year, month) =>
     request(`/api/attendance?year=${year}&month=${month}`, { token }),
+  getDashboard: (token, year, month) =>
+    request(`/api/dashboard?year=${year}&month=${month}`, { token }),
 };

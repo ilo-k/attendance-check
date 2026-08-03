@@ -65,6 +65,7 @@ export function Home() {
         </div>
         <div className="home-actions">
           <Link to="/checkin">체크인 (QR 스캔)</Link>
+          <Link to="/nickname">닉네임 변경</Link>
           <button onClick={logout}>로그아웃</button>
         </div>
       </header>
@@ -98,6 +99,7 @@ export function Home() {
                   {new Date(record.AM.checkedInAt).toLocaleTimeString("ko-KR", {
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   })}
                   )
                 </div>
@@ -108,6 +110,7 @@ export function Home() {
                   {new Date(record.PM.checkedInAt).toLocaleTimeString("ko-KR", {
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   })}
                   )
                 </div>
@@ -115,6 +118,12 @@ export function Home() {
             </div>
           );
         })}
+      </div>
+
+      <div className="dashboard-link">
+        <Link to="/dashboard">
+          <button type="button">출석 현황 대시보드</button>
+        </Link>
       </div>
     </div>
   );

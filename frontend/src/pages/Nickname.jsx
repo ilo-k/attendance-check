@@ -9,10 +9,11 @@ function safeRedirect(path) {
 }
 
 export function Nickname() {
-  const { token, updateUser } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const [nickname, setNickname] = useState("");
+  const isChange = Boolean(user?.nickname);
+  const [nickname, setNickname] = useState(user?.nickname || "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +22,8 @@ export function Nickname() {
     setError("");
     setLoading(true);
     try {
-      const { user } = await api.setNickname(token, nickname);
-      updateUser(user);
+      const { user: updated } = await api.setNickname(token, nickname);
+      updateUser(updated);
       navigate(safeRedirect(params.get("redirect")), { replace: true });
     } catch (err) {
       setError(err.message);
@@ -33,8 +34,12 @@ export function Nickname() {
 
   return (
     <div className="page page-narrow">
-      <h1>닉네임 설정</h1>
-      <p>캘린더에 표시될 이름을 입력해주세요</p>
+      <h1>{isChange ? "닉네임 변경" : "닉네임 설정"}</h1>
+      <p>
+        {isChange
+          ? "닉네임을 바꾸면 이전 출석 기록의 이름도 함께 바뀌어요"
+          : "캘린더에 표시될 이름을 입력해주세요"}
+      </p>
       <form onSubmit={handleSubmit} className="form">
         <label>
           닉네임
@@ -47,7 +52,7 @@ export function Nickname() {
         </label>
         {error && <p className="error-text">{error}</p>}
         <button type="submit" disabled={loading}>
-          {loading ? "저장 중..." : "저장하고 시작하기"}
+          {loading ? "저장 중..." : isChange ? "변경하기" : "저장하고 시작하기"}
         </button>
       </form>
     </div>
