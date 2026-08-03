@@ -37,6 +37,8 @@ jobs:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
+      - name: Add SPA fallback for GitHub Pages (client-side routing)
+        run: cp frontend/dist/index.html frontend/dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
