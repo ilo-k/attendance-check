@@ -9,7 +9,7 @@ export const authRouter = Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function issueToken(userId) {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "365d" });
 }
 
 authRouter.post("/google", async (req, res) => {
