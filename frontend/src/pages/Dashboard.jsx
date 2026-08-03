@@ -48,7 +48,9 @@ export function Dashboard() {
     <div className="page">
       <header className="home-header">
         <h1>출석 현황</h1>
-        <Link to="/">캘린더로 이동</Link>
+        <Link to="/" className="btn">
+          캘린더로 이동
+        </Link>
       </header>
 
       <div className="calendar-nav">

@@ -59,13 +59,19 @@ export function Home() {
 
   return (
     <div className="page">
+      <h1 className="app-title">🌙Luna Store</h1>
+
       <header className="home-header">
         <div>
           <strong>{user?.nickname}</strong>님 환영합니다
         </div>
         <div className="home-actions">
-          <Link to="/nickname">닉네임 변경</Link>
-          <button onClick={logout}>로그아웃</button>
+          <Link to="/nickname" className="btn">
+            닉네임 변경
+          </Link>
+          <button className="btn" onClick={logout}>
+            로그아웃
+          </button>
         </div>
       </header>
 
@@ -93,7 +99,7 @@ export function Home() {
             <div key={dateStr} className="calendar-cell">
               <div className="calendar-day">{day}</div>
               {record?.AM && (
-                <div className="calendar-entry">
+                <div className="calendar-entry calendar-entry-am">
                   오전 {record.AM.userName} (
                   {new Date(record.AM.checkedInAt).toLocaleTimeString("ko-KR", {
                     hour: "2-digit",
@@ -104,7 +110,7 @@ export function Home() {
                 </div>
               )}
               {record?.PM && (
-                <div className="calendar-entry">
+                <div className="calendar-entry calendar-entry-pm">
                   오후 {record.PM.userName} (
                   {new Date(record.PM.checkedInAt).toLocaleTimeString("ko-KR", {
                     hour: "2-digit",
@@ -120,8 +126,8 @@ export function Home() {
       </div>
 
       <div className="dashboard-link">
-        <Link to="/dashboard">
-          <button type="button">출석 현황 대시보드</button>
+        <Link to="/dashboard" className="btn">
+          출석 현황 대시보드
         </Link>
       </div>
     </div>

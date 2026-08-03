@@ -42,14 +42,18 @@ export function CheckIn() {
       {status === "success" && (
         <>
           <p className="success-text">출석 체크가 완료되었습니다!</p>
-          <Link to="/">캘린더로 이동</Link>
+          <Link to="/" className="btn">
+            캘린더로 이동
+          </Link>
         </>
       )}
 
       {status === "error" && (
         <>
           <p className="error-text">{message}</p>
-          <Link to="/">캘린더로 이동</Link>
+          <Link to="/" className="btn">
+            캘린더로 이동
+          </Link>
         </>
       )}
 

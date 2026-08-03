@@ -51,7 +51,7 @@ export function Nickname() {
           />
         </label>
         {error && <p className="error-text">{error}</p>}
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn" disabled={loading}>
           {loading ? "저장 중..." : isChange ? "변경하기" : "저장하고 시작하기"}
         </button>
       </form>
