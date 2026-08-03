@@ -64,7 +64,6 @@ export function Home() {
           <strong>{user?.nickname}</strong>님 환영합니다
         </div>
         <div className="home-actions">
-          <Link to="/checkin">체크인 (QR 스캔)</Link>
           <Link to="/nickname">닉네임 변경</Link>
           <button onClick={logout}>로그아웃</button>
         </div>
