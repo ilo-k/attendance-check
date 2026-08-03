@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { loadGoogleIdentity } from "../lib/googleIdentity.js";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -36,18 +37,28 @@ export function Login() {
       }
     }
 
-    if (!window.google || !GOOGLE_CLIENT_ID) return;
+    if (!GOOGLE_CLIENT_ID) return;
+    let cancelled = false;
 
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse,
-    });
-    window.google.accounts.id.renderButton(buttonRef.current, {
-      theme: "outline",
-      size: "large",
-      text: "continue_with",
-      locale: "ko",
-    });
+    loadGoogleIdentity()
+      .then(() => {
+        if (cancelled) return;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          locale: "ko",
+        });
+      })
+      .catch((err) => !cancelled && setError(err.message));
+
+    return () => {
+      cancelled = true;
+    };
   }, [login, navigate, params]);
 
   return (
