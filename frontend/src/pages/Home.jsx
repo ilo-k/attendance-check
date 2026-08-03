@@ -61,7 +61,7 @@ export function Home() {
     <div className="page">
       <header className="home-header">
         <div>
-          <strong>{user?.name}</strong>님 환영합니다
+          <strong>{user?.nickname}</strong>님 환영합니다
         </div>
         <div className="home-actions">
           <Link to="/checkin">체크인 (QR 스캔)</Link>

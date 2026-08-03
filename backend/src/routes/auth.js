@@ -1,53 +1,74 @@
 import { Router } from "express";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 
 export const authRouter = Router();
 
-authRouter.post("/register", async (req, res) => {
-  const { username, password, name } = req.body;
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  if (!username || !password || !name) {
-    return res.status(400).json({ error: "아이디, 비밀번호, 이름을 모두 입력해주세요." });
+function issueToken(userId) {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+}
+
+authRouter.post("/google", async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ error: "idToken이 필요합니다." });
   }
 
-  const existing = await prisma.user.findUnique({ where: { username } });
-  if (existing) {
-    return res.status(409).json({ error: "이미 사용 중인 아이디입니다." });
+  let payload;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch {
+    return res.status(401).json({ error: "구글 로그인 검증에 실패했습니다." });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: { username, passwordHash, name },
+  const user = await prisma.user.upsert({
+    where: { googleId: payload.sub },
+    update: {},
+    create: { googleId: payload.sub, email: payload.email },
   });
 
-  return res.status(201).json({ id: user.id, username: user.username, name: user.name });
+  const token = issueToken(user.id);
+
+  return res.json({
+    token,
+    user: { id: user.id, nickname: user.nickname, email: user.email },
+    needsNickname: !user.nickname,
+  });
 });
 
-authRouter.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+authRouter.post("/nickname", requireAuth, async (req, res) => {
+  const nickname = req.body.nickname?.trim();
 
-  const user = await prisma.user.findUnique({ where: { username } });
-  if (!user) {
-    return res.status(401).json({ error: "아이디 또는 비밀번호가 올바르지 않습니다." });
+  if (!nickname || nickname.length < 1 || nickname.length > 20) {
+    return res.status(400).json({ error: "닉네임은 1~20자로 입력해주세요." });
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
-    return res.status(401).json({ error: "아이디 또는 비밀번호가 올바르지 않습니다." });
+  const existing = await prisma.user.findUnique({ where: { nickname } });
+  if (existing && existing.id !== req.user.id) {
+    return res.status(409).json({ error: "이미 사용 중인 닉네임입니다." });
   }
 
-  const token = jwt.sign(
-    { id: user.id, username: user.username, name: user.name },
-    process.env.JWT_SECRET,
-    { expiresIn: "30d" }
-  );
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { nickname },
+  });
 
-  return res.json({ token, user: { id: user.id, username: user.username, name: user.name } });
+  return res.json({ user: { id: user.id, nickname: user.nickname, email: user.email } });
 });
 
-authRouter.get("/me", requireAuth, (req, res) => {
-  res.json({ user: req.user });
+authRouter.get("/me", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  return res.json({
+    user: { id: user.id, nickname: user.nickname, email: user.email },
+    needsNickname: !user.nickname,
+  });
 });

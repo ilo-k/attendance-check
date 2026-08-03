@@ -1,63 +1,66 @@
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+// 오픈 리다이렉트 방지: "/"로 시작하되 "//"나 "\"로 시작하는 프로토콜 상대 경로는 거부
+function safeRedirect(path) {
+  if (path && /^\/(?!\/|\\)/.test(path)) return path;
+  return "/";
+}
+
 export function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const [error, setError] = useState("");
+  const buttonRef = useRef(null);
 
-  // 오픈 리다이렉트 방지: "/"로 시작하되 "//"나 "\"로 시작하는 프로토콜 상대 경로는 거부
-  function safeRedirect(path) {
-    if (path && /^\/(?!\/|\\)/.test(path)) return path;
-    return "/";
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const { token, user } = await api.login(username, password);
-      login(token, user);
-      navigate(safeRedirect(params.get("redirect")), { replace: true });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function handleCredentialResponse(response) {
+      setError("");
+      try {
+        const { token, user, needsNickname } = await api.googleLogin(response.credential);
+        login(token, user);
+        if (needsNickname) {
+          navigate(`/nickname?redirect=${encodeURIComponent(params.get("redirect") || "/")}`, {
+            replace: true,
+          });
+        } else {
+          navigate(safeRedirect(params.get("redirect")), { replace: true });
+        }
+      } catch (err) {
+        setError(err.message);
+      }
     }
-  }
+
+    if (!window.google || !GOOGLE_CLIENT_ID) return;
+
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse,
+    });
+    window.google.accounts.id.renderButton(buttonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      locale: "ko",
+    });
+  }, [login, navigate, params]);
 
   return (
     <div className="page page-narrow">
-      <h1>로그인</h1>
-      <form onSubmit={handleSubmit} className="form">
-        <label>
-          아이디
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required />
-        </label>
-        <label>
-          비밀번호
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-        {error && <p className="error-text">{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? "로그인 중..." : "로그인"}
-        </button>
-      </form>
-      <p>
-        계정이 없으신가요? <Link to="/register">회원가입</Link>
-      </p>
+      <h1>출석체크</h1>
+      <p>구글 계정으로 로그인해주세요</p>
+      <div ref={buttonRef} />
+      {!GOOGLE_CLIENT_ID && (
+        <p className="error-text">
+          VITE_GOOGLE_CLIENT_ID가 설정되지 않았습니다. .env를 확인해주세요.
+        </p>
+      )}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 }

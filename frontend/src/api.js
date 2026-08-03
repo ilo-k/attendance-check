@@ -22,10 +22,10 @@ async function request(path, { method = "GET", body, token } = {}) {
 }
 
 export const api = {
-  register: (username, password, name) =>
-    request("/api/auth/register", { method: "POST", body: { username, password, name } }),
-  login: (username, password) =>
-    request("/api/auth/login", { method: "POST", body: { username, password } }),
+  googleLogin: (idToken) => request("/api/auth/google", { method: "POST", body: { idToken } }),
+  setNickname: (token, nickname) =>
+    request("/api/auth/nickname", { method: "POST", token, body: { nickname } }),
+  getMe: (token) => request("/api/auth/me", { token }),
   checkIn: (token) => request("/api/checkin", { method: "POST", token }),
   getAttendance: (token, year, month) =>
     request(`/api/attendance?year=${year}&month=${month}`, { token }),

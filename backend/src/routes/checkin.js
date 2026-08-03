@@ -8,6 +8,11 @@ export const checkinRouter = Router();
 const PERIOD_LABEL = { AM: "오전", PM: "오후" };
 
 checkinRouter.post("/", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user?.nickname) {
+    return res.status(400).json({ error: "닉네임을 먼저 설정해주세요." });
+  }
+
   const { dateStr, period } = getTodaySeoul();
 
   try {
@@ -15,8 +20,8 @@ checkinRouter.post("/", requireAuth, async (req, res) => {
       data: {
         date: dateStr,
         period,
-        userId: req.user.id,
-        userName: req.user.name,
+        userId: user.id,
+        userName: user.nickname,
       },
     });
     return res.status(201).json({ attendance });

@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  username     String       @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime     @default(now())
-  attendances  Attendance[]
+  id          Int          @id @default(autoincrement())
+  googleId    String       @unique
+  email       String
+  nickname    String?      @unique
+  createdAt   DateTime     @default(now())
+  attendances Attendance[]
 }
 
 enum Period {
